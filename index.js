@@ -1,6 +1,8 @@
+require('dotenv').config()
+const Person = require('./models/person')
+
 const express = require('express')
 const app = express()
-
 
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
@@ -45,19 +47,17 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+  Person.find({}).then(persons => {
+    res.json(persons.map(person => person.toJSON()));
+  });
 })
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(person => person.id === id)
 
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
-    res.json(persons)
+
+app.get('/api/persons/:id', (req, res) => {
+  Person.findById(req.params.id).then(person => {
+    res.json(person.toJSON())
+  })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -69,21 +69,22 @@ app.delete('/api/persons/:id', (req, res) => {
 
 
   app.post('/api/persons', (req, res) => {
-    const id = Math.floor(Math.random()*250);
-    const person = req.body
-    if(person.name == '' || person.name == null || person.number == '' || person.number == null) {
+    const body = req.body
+
+    if(body.name == '' || body.name == null || body.number == '' || body.number == null) {
         res.json({error: 'please fill out all required fields'})
         return;
     }
-    let search = persons.find(contact => contact.name === person.name)
-    if(search) {
-        res.json({error: 'name must be unique'})
-        return;
-    }
-    person.id = id;
-    persons = persons.concat(person)
-    res.json(person)
+
+  const person = new Person({
+    name: body.name,
+    number: body.number
   })
+
+  person.save().then(savedPerson => {
+    res.json(savedPerson.toJSON())
+  })
+})
 
 
 app.get('/info', (req, res) => {
@@ -94,7 +95,7 @@ app.get('/info', (req, res) => {
     res.send(layout)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
