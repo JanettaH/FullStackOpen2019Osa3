@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 if (process.argv.length < 3) {
-  console.log("give password as argument");
+  console.log('give password as argument');
   process.exit(1);
 }
 
@@ -16,13 +16,13 @@ const personSchema = new mongoose.Schema({
   number: String
 });
 
-const Person = mongoose.model("Person", personSchema);
+const Person = mongoose.model('Person', personSchema);
 
 if (process.argv.length == 3) {
-  console.log("phonebook:");
+  console.log('phonebook:');
   Person.find({}).then(result => {
     result.forEach(person => {
-      console.log(person.name + " " + person.number);
+      console.log(`${person.name} ${person.number}`);
     });
     mongoose.connection.close();
   });
@@ -32,8 +32,8 @@ if (process.argv.length == 3) {
     number: process.argv[4]
   });
 
-  person.save().then(result => {
-    console.log("person saved!");
+  person.save().then(() => {
+    console.log('person saved!');
     mongoose.connection.close();
   });
 }
